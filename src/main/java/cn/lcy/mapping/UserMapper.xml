@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.lcy.dao.UserDao">
+    <!-- 定义缓存  一般是一级缓存，如果用同一个sqlsession 那么相同查询直接会从缓存中查找 -->
+    <cache size="1024" flushInterval="60000" eviction="LRU" readOnly="false"></cache>
+    <!-- 增加 -->
+    <insert id="add" parameterType="cn.lcy.domain.User">
+		insert into users values(null,#{name},#{number},#{course},#{pre},#{operate},#{conclusion},#{result})
+	</insert>
+    <resultMap id="userResultMap" type="cn.lcy.domain.User" >
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="number" column="number"/>
+        <result property="course" column="course"/>
+        <result property="pre" column="pre" />
+        <result property="operate" column="operate" />
+        <result property="conclusion" column="conclusion" />
+        <result property="result" column="result" />
+    </resultMap>
+
+    <select id="getAll" parameterType="cn.lcy.domain.User" resultMap="userResultMap">
+        SELECT * from  users
+    </select>
+
+
+    <select id="getUserById" parameterType="Integer" resultMap="userResultMap">
+    	select * from users where id=#{id}
+    </select>
+    <select id="find" parameterType="cn.lcy.domain.User" resultMap="userResultMap">
+        select * from users
+        <where>
+            <if test="name!=null and name!='' ">
+                and name like #{name}
+            </if>
+        </where>
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+    <select id="getTotal" parameterType="Map" resultType="Long">
+        select count(*) from users
+        <where>
+            <if test="name!=null and name!='' ">
+                and name like #{name}
+            </if>
+        </where>
+    </select>
+    <!-- 用户删除 -->
+    <delete id="delete" parameterType="Integer[]">
+		delete from users where id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+	</delete>
+    <!-- 用户修改 -->
+    <update id="update" parameterType="cn.lcy.domain.User">
+        update users
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="number != null and number != ''">number = #{number},</if>
+            <if test="course != null and course != ''">course = #{course},</if>
+            <if test="pre != null and pre != ''">pre = #{pre},</if>
+            <if test="operate != null and operate != ''">operate = #{operate},</if>
+            <if test="conclusion != null and conclusion != ''">conclusion = #{conclusion},</if>
+            <if test="result != null and result != ''">result = #{result},</if>
+
+        </set>
+        where id = #{id}
+    </update>
+</mapper>
